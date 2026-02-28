@@ -10,6 +10,7 @@ defmodule PoolexExampleWeb.PoolLive do
 
     {:ok,
      assign(socket,
+       page_title: "Poolex Dashboard",
        poolex_version: poolex_version,
        debug_info: debug_info,
        occupy_duration: 10
@@ -35,24 +36,22 @@ defmodule PoolexExampleWeb.PoolLive do
   end
 
   @impl true
-  def handle_event("update_duration", %{"duration" => val}, socket) do
-    case Integer.parse(val) do
-      {n, ""} when n > 0 -> {:noreply, assign(socket, occupy_duration: n)}
-      _ -> {:noreply, socket}
-    end
-  end
-
-  @impl true
   def handle_event("occupy", %{"duration" => secs}, socket) do
-    ms = String.to_integer(secs) * 1_000
+    case Integer.parse(secs) do
+      {n, ""} when n > 0 ->
+        ms = n * 1_000
 
-    Task.start(fn ->
-      Poolex.run(:demo_pool, fn worker ->
-        GenServer.call(worker, {:sleep, ms}, ms + 5_000)
-      end)
-    end)
+        Task.start(fn ->
+          Poolex.run(:demo_pool, fn worker ->
+            GenServer.call(worker, {:sleep, ms}, ms + 5_000)
+          end)
+        end)
 
-    {:noreply, socket}
+        {:noreply, socket}
+
+      _ ->
+        {:noreply, socket}
+    end
   end
 
   defp schedule_tick, do: Process.send_after(self(), :tick, 1_000)
