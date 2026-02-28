@@ -1,0 +1,100 @@
+<div class="max-w-3xl mx-auto py-10 px-4 space-y-8">
+  <%!-- Header --%>
+  <div>
+    <h1 class="text-3xl font-bold text-gray-900">Poolex Dashboard</h1>
+    <p class="mt-1 text-sm text-gray-500">
+      Poolex <span class="font-mono font-semibold text-indigo-600">v{@poolex_version}</span>
+    </p>
+  </div>
+
+  <%!-- Pool Configuration --%>
+  <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+    <h2 class="text-lg font-semibold text-gray-700 mb-4">Pool Configuration</h2>
+    <dl class="grid grid-cols-2 gap-x-8 gap-y-2 text-sm">
+      <dt class="text-gray-500">Worker module</dt>
+      <dd class="font-mono text-gray-900">{inspect(@debug_info.worker_module)}</dd>
+
+      <dt class="text-gray-500">Worker args</dt>
+      <dd class="font-mono text-gray-900">{inspect(@debug_info.worker_args)}</dd>
+
+      <dt class="text-gray-500">Max overflow</dt>
+      <dd class="font-mono text-gray-900">{@debug_info.max_overflow}</dd>
+
+      <dt class="text-gray-500">Shutdown delay</dt>
+      <dd class="font-mono text-gray-900">{@debug_info.worker_shutdown_delay} ms</dd>
+    </dl>
+  </div>
+
+  <%!-- Worker States --%>
+  <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+    <h2 class="text-lg font-semibold text-gray-700 mb-4">Workers</h2>
+    <div class="grid grid-cols-2 gap-6">
+      <div>
+        <h3 class="text-sm font-medium text-gray-500 mb-2">
+          Idle ({@debug_info.idle_workers_count})
+        </h3>
+        <div class="space-y-1">
+          <%= for pid <- @debug_info.idle_workers_pids do %>
+            <span class="inline-block bg-green-100 text-green-800 text-xs font-mono px-2 py-1 rounded">
+              {inspect(pid)}
+            </span>
+          <% end %>
+        </div>
+      </div>
+      <div>
+        <h3 class="text-sm font-medium text-gray-500 mb-2">
+          Busy ({@debug_info.busy_workers_count})
+        </h3>
+        <div class="space-y-1">
+          <%= for pid <- @debug_info.busy_workers_pids do %>
+            <span class="inline-block bg-orange-100 text-orange-800 text-xs font-mono px-2 py-1 rounded">
+              {inspect(pid)}
+            </span>
+          <% end %>
+        </div>
+      </div>
+    </div>
+    <%= if @debug_info.waiting_callers != [] do %>
+      <div class="mt-4 text-sm text-red-600">
+        Waiting callers: {length(@debug_info.waiting_callers)}
+      </div>
+    <% end %>
+  </div>
+
+  <%!-- Controls --%>
+  <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+    <h2 class="text-lg font-semibold text-gray-700 mb-4">Controls</h2>
+    <div class="flex flex-wrap items-center gap-4">
+      <button
+        phx-click="add_worker"
+        class="px-4 py-2 bg-indigo-600 text-white text-sm font-medium rounded-lg hover:bg-indigo-700"
+      >
+        + Add worker
+      </button>
+      <button
+        phx-click="remove_worker"
+        class="px-4 py-2 bg-gray-200 text-gray-700 text-sm font-medium rounded-lg hover:bg-gray-300"
+      >
+        − Remove worker
+      </button>
+
+      <form id="occupy-form" phx-submit="occupy" class="flex items-center gap-2">
+        <label class="text-sm text-gray-600">Duration:</label>
+        <input
+          type="number"
+          name="duration"
+          value={@occupy_duration}
+          min="1"
+          class="w-20 px-2 py-2 border border-gray-300 rounded-lg text-sm font-mono"
+        />
+        <span class="text-sm text-gray-500">sec</span>
+        <button
+          type="submit"
+          class="px-4 py-2 bg-amber-500 text-white text-sm font-medium rounded-lg hover:bg-amber-600"
+        >
+          Occupy worker
+        </button>
+      </form>
+    </div>
+  </div>
+</div>

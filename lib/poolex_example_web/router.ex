@@ -17,7 +17,7 @@ defmodule PoolexExampleWeb.Router do
   scope "/", PoolexExampleWeb do
     pipe_through :browser
 
-    get "/", PageController, :home
+    live "/", PoolLive
   end
 
   # Other scopes may use custom stacks.
