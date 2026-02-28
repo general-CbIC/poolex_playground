@@ -16,7 +16,8 @@ defmodule PoolexExample.Application do
       {Poolex,
         pool_id: :demo_pool,
         worker_module: PoolexExample.DemoWorker,
-        workers_count: 3},
+        workers_count: 3,
+        worker_args: [[]]},
       # Start to serve requests, typically the last entry
       PoolexExampleWeb.Endpoint
     ]
