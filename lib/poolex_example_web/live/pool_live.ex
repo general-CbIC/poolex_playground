@@ -7,20 +7,27 @@ defmodule PoolexExampleWeb.PoolLive do
 
     poolex_version = Application.spec(:poolex, :vsn) |> to_string()
     debug_info = Poolex.Private.DebugInfo.get_debug_info(:demo_pool)
+    {milliseconds_from_start, _since_last_call} = :erlang.statistics(:wall_clock)
 
     {:ok,
      assign(socket,
-       page_title: "Poolex Dashboard",
-       poolex_version: poolex_version,
        debug_info: debug_info,
-       occupy_duration: 10
+       milliseconds_from_start: milliseconds_from_start,
+       occupy_duration: 10,
+       page_title: "Poolex Dashboard",
+       poolex_version: poolex_version
      )}
   end
 
   @impl true
   def handle_info(:tick, socket) do
     schedule_tick()
-    {:noreply, assign(socket, debug_info: Poolex.Private.DebugInfo.get_debug_info(:demo_pool))}
+
+    debug_info = Poolex.Private.DebugInfo.get_debug_info(:demo_pool)
+    {milliseconds_from_start, _since_last_call} = :erlang.statistics(:wall_clock)
+
+    {:noreply,
+     assign(socket, debug_info: debug_info, milliseconds_from_start: milliseconds_from_start)}
   end
 
   @impl true
