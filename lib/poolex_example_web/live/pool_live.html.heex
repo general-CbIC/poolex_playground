@@ -1,7 +1,7 @@
 <div class="max-w-3xl mx-auto py-10 px-4 space-y-8">
   <%!-- Header --%>
     <div>
-      <h1 class="text-3xl font-bold text-white">Poolex Dashboard</h1>
+      <h1 class="text-3xl font-bold text-white">Poolex Playground</h1>
       <p class="mt-1 text-sm text-gray-400">
         Poolex version: <span class="font-mono font-semibold text-purple-400">v{@poolex_version}</span>
       </p>
@@ -88,6 +88,18 @@
                   class="w-20 px-2 py-2 border border-gray-300 rounded-lg text-sm text-gray-900 font-mono" />
                 <span class="text-sm text-gray-500">sec</span>
               </form>
+
+              <button phx-click="acquire"
+                class=" px-4 py-2 bg-blue-200 text-blue-700 text-sm font-medium rounded-lg hover:bg-blue-300">
+                Acquire worker
+              </button>
+
+              <button phx-click="release"
+                class="px-4 py-2 bg-blue-200 text-blue-700 text-sm font-medium rounded-lg hover:bg-blue-300">
+                Release worker
+              </button>
+
+              <span class="font-mono text-gray-900">Acquired workers count: <%= length(@acquired_workers) %></span>
             </div>
           </div>
 </div>
