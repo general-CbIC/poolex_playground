@@ -24,7 +24,7 @@ defmodule PoolexExampleWeb.PoolLiveTest do
     initial = Poolex.Private.DebugInfo.get_debug_info(:demo_pool).idle_workers_count
 
     on_exit(fn -> Poolex.remove_idle_workers!(:demo_pool, 1) end)
-    view |> element("button", "+ Add worker") |> render_click()
+    view |> element("button", "Add worker") |> render_click()
 
     updated = Poolex.Private.DebugInfo.get_debug_info(:demo_pool).idle_workers_count
     assert updated == initial + 1
@@ -35,7 +35,7 @@ defmodule PoolexExampleWeb.PoolLiveTest do
     initial = Poolex.Private.DebugInfo.get_debug_info(:demo_pool).idle_workers_count
 
     on_exit(fn -> Poolex.add_idle_workers!(:demo_pool, 1) end)
-    view |> element("button", "\u2212 Remove worker") |> render_click()
+    view |> element("button", "Remove worker") |> render_click()
 
     updated = Poolex.Private.DebugInfo.get_debug_info(:demo_pool).idle_workers_count
     assert updated == initial - 1
