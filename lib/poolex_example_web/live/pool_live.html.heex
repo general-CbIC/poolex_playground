@@ -35,8 +35,14 @@
           <dt class="text-gray-500">Worker args</dt>
           <dd class="font-mono text-gray-900">{inspect(@debug_info.worker_args)}</dd>
 
+          <dt class="text-gray-500">Total workers count</dt>
+          <dd class="font-mono text-gray-900">{@debug_info.idle_workers_count + @debug_info.busy_workers_count}</dd>
+
           <dt class="text-gray-500">Max overflow</dt>
           <dd class="font-mono text-gray-900">{@debug_info.max_overflow}</dd>
+
+          <dt class="text-gray-500">Current overflow</dt>
+          <dd class="font-mono text-gray-900">{@debug_info.overflow}</dd>
 
           <dt class="text-gray-500">Shutdown delay</dt>
           <dd class="font-mono text-gray-900">{@debug_info.worker_shutdown_delay} ms</dd>
@@ -116,25 +122,4 @@
               <span class="font-mono text-gray-900">Acquired workers count: <%= length(@acquired_workers) %></span>
             </div>
           </div>
-
-          <footer class="grid grid-flow-col justify-items-center">
-            <div>
-              <p class="font-bold text-purple-600 hover:text-purple-400">
-                <a href="https://github.com/general-CbIC/poolex" target="_blank">GitHub</a>
-              </p>
-            </div>
-
-            <div>
-              <p class="font-bold text-purple-600 hover:text-purple-400">
-                <a href="https://hex.pm/packages/poolex" target="_blank">Hex.pm</a>
-              </p>
-            </div>
-
-            <div>
-              <p class="font-bold text-purple-600 hover:text-purple-400">
-                <a href="https://github.com/sponsors/general-CbIC" target="_blank">Sponsor</a>
-              </p>
-            </div>
-
-          </footer>
 </div>
