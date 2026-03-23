@@ -60,7 +60,7 @@ defmodule PoolexExample.MixProject do
       {:jason, "~> 1.2"},
       {:dns_cluster, "~> 0.2.0"},
       {:bandit, "~> 1.5"},
-      {:poolex, "~> 1.5.0"}
+      {:poolex, "~> 1.6.0"}
     ]
   end
 
