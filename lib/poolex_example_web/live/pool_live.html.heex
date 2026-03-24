@@ -43,8 +43,14 @@
           <dt class="text-gray-500">Worker args</dt>
           <dd class="font-mono text-gray-900">{inspect(@debug_info.worker_args)}</dd>
 
+          <dt class="text-gray-500">Minimum pool size</dt>
+          <dd class="font-mono text-gray-900">{@debug_info.min_pool_size}</dd>
+
+          <dt class="text-gray-500">Maximum pool size</dt>
+          <dd class="font-mono text-gray-900">{@debug_info.max_pool_size}</dd>
+
           <dt class="text-gray-500">Total workers count</dt>
-          <dd class="font-mono text-gray-900">{@debug_info.idle_workers_count + @debug_info.busy_workers_count}</dd>
+          <dd class="font-mono text-gray-900">{@debug_info.total_workers_count}</dd>
 
           <dt class="text-gray-500">Max overflow</dt>
           <dd class="font-mono text-gray-900">{@debug_info.max_overflow}</dd>

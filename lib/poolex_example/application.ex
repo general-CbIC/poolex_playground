@@ -18,7 +18,9 @@ defmodule PoolexExample.Application do
        worker_module: PoolexExample.DemoWorker,
        workers_count: 3,
        max_overflow: 5,
-       worker_args: [[]]},
+       worker_args: [[]],
+       min_pool_size: 3,
+       max_pool_size: 10},
       # Start to serve requests, typically the last entry
       PoolexExampleWeb.Endpoint
     ]
