@@ -13,6 +13,11 @@ config :poolex_example,
 # Configure the endpoint
 config :poolex_example, PoolexExampleWeb.Endpoint,
   url: [host: "localhost"],
+  check_origin: [
+    "//localhost",
+    "https://poolex-example.fly.dev/",
+    "https://poolex-playground.cbic-dev.com/"
+  ],
   adapter: Bandit.PhoenixAdapter,
   render_errors: [
     formats: [html: PoolexExampleWeb.ErrorHTML, json: PoolexExampleWeb.ErrorJSON],
