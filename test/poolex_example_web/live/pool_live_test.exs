@@ -3,6 +3,17 @@ defmodule PoolexExampleWeb.PoolLiveTest do
 
   import Phoenix.LiveViewTest
 
+  @pool_id :demo_pool
+  @timeout 2_000
+  @poll_interval 10
+
+  # The pool is global state shared by the whole suite, so every test starts
+  # from a quiet pool and puts back exactly what it changed.
+  setup do
+    wait_for_idle_pool()
+    :ok
+  end
+
   test "mounts and shows Poolex version", %{conn: conn} do
     {:ok, _view, html} = live(conn, "/")
     poolex_version = Application.spec(:poolex, :vsn) |> to_string()
@@ -21,24 +32,27 @@ defmodule PoolexExampleWeb.PoolLiveTest do
 
   test "add_worker increases idle count", %{conn: conn} do
     {:ok, view, _html} = live(conn, "/")
-    initial = Poolex.Private.DebugInfo.get_debug_info(:demo_pool).idle_workers_count
+    baseline = idle_workers_count()
+    on_exit(fn -> restore_pool_size(baseline) end)
 
-    on_exit(fn -> Poolex.remove_idle_workers!(:demo_pool, 1) end)
     view |> element("button", "Add worker") |> render_click()
 
-    updated = Poolex.Private.DebugInfo.get_debug_info(:demo_pool).idle_workers_count
-    assert updated == initial + 1
+    assert idle_workers_count() == baseline + 1
   end
 
   test "remove_worker decreases idle count", %{conn: conn} do
     {:ok, view, _html} = live(conn, "/")
-    initial = Poolex.Private.DebugInfo.get_debug_info(:demo_pool).idle_workers_count
+    baseline = idle_workers_count()
+    on_exit(fn -> restore_pool_size(baseline) end)
 
-    on_exit(fn -> Poolex.add_idle_workers!(:demo_pool, 1) end)
+    # The pool boots at min_pool_size, where removal is refused by design, so
+    # lift it above the floor before exercising the button.
+    Poolex.add_idle_workers!(@pool_id, 1)
+    initial = idle_workers_count()
+
     view |> element("button", "Remove worker") |> render_click()
 
-    updated = Poolex.Private.DebugInfo.get_debug_info(:demo_pool).idle_workers_count
-    assert updated == initial - 1
+    assert idle_workers_count() == initial - 1
   end
 
   test "occupy submits without error", %{conn: conn} do
@@ -48,8 +62,54 @@ defmodule PoolexExampleWeb.PoolLiveTest do
     |> form("#occupy-form", %{duration: "1"})
     |> render_submit()
 
-    # Give the task a moment to start, then verify LiveView is still alive
-    Process.sleep(100)
+    assert wait_until(fn -> busy_workers_count() > 0 end),
+           "submitting the occupy form did not put any worker to work"
+
     assert Process.alive?(view.pid)
+
+    # The task holds its worker for a full second; wait it out so the busy
+    # worker does not leak into the next test.
+    wait_for_idle_pool()
+  end
+
+  defp debug_info, do: Poolex.Private.DebugInfo.get_debug_info(@pool_id)
+
+  defp idle_workers_count, do: debug_info().idle_workers_count
+
+  defp busy_workers_count, do: debug_info().busy_workers_count
+
+  defp wait_for_idle_pool do
+    assert wait_until(fn -> busy_workers_count() == 0 end),
+           "pool still had busy workers after #{@timeout}ms"
+  end
+
+  # Puts the pool back to `baseline` idle workers whether or not the action
+  # under test actually went through.
+  defp restore_pool_size(baseline) do
+    wait_for_idle_pool()
+
+    case idle_workers_count() - baseline do
+      0 -> :ok
+      extra when extra > 0 -> Poolex.remove_idle_workers!(@pool_id, extra)
+      missing -> Poolex.add_idle_workers!(@pool_id, -missing)
+    end
+  end
+
+  defp wait_until(fun) do
+    wait_until(fun, System.monotonic_time(:millisecond) + @timeout)
+  end
+
+  defp wait_until(fun, deadline) do
+    cond do
+      fun.() ->
+        true
+
+      System.monotonic_time(:millisecond) >= deadline ->
+        false
+
+      true ->
+        Process.sleep(@poll_interval)
+        wait_until(fun, deadline)
+    end
   end
 end
