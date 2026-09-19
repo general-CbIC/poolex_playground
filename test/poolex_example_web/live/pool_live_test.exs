@@ -55,6 +55,17 @@ defmodule PoolexExampleWeb.PoolLiveTest do
     assert idle_workers_count() == initial - 1
   end
 
+  test "shows the Aviasales sponsor logo linking to the sponsor page", %{conn: conn} do
+    {:ok, view, _html} = live(conn, "/")
+
+    assert has_element?(
+             view,
+             ~s(#sponsor-aviasales[href="https://aviasales.tpo.mx/bNjfn4k9"][target="_blank"])
+           )
+
+    assert has_element?(view, ~s(#sponsor-aviasales img[alt="Aviasales"]))
+  end
+
   test "occupy submits without error", %{conn: conn} do
     {:ok, view, _html} = live(conn, "/")
 
