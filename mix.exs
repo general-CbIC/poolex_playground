@@ -60,8 +60,15 @@ defmodule PoolexExample.MixProject do
       {:jason, "~> 1.2"},
       {:dns_cluster, "~> 0.3.0"},
       {:bandit, "~> 1.5"},
-      {:poolex, "~> 1.0"}
+      {:poolex, "~> 1.0"},
       # {:poolex, github: "general-CbIC/poolex", branch: "develop"}
+      # Development dependencies
+      {:credo, "~> 1.7", only: [:dev], runtime: false},
+      {:dialyxir, "~> 1.4", only: [:dev], runtime: false},
+      {:ex_check, "~> 0.16.0", only: [:dev], runtime: false},
+      {:mix_audit, "~> 2.1", only: [:dev], runtime: false},
+      {:sobelow, "~> 0.16.0", only: [:dev], runtime: false},
+      {:styler, "~> 1.12", only: [:dev, :test], runtime: false}
     ]
   end
 
