@@ -4,6 +4,8 @@
     {:doctor, false},
     {:ex_doc, false},
     ## the app doesn't use gettext
-    {:gettext, false}
+    {:gettext, false},
+    ## honour `# sobelow_skip` comments in code
+    {:sobelow, "mix sobelow --exit --skip"}
   ]
 ]

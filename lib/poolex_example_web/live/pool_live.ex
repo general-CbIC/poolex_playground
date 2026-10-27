@@ -51,14 +51,7 @@ defmodule PoolexExampleWeb.PoolLive do
   def handle_event("occupy", %{"duration" => secs}, socket) do
     case Integer.parse(secs) do
       {n, ""} when n > 0 ->
-        ms = n * 1_000
-
-        Task.start(fn ->
-          Poolex.run(@pool_id, fn worker ->
-            GenServer.call(worker, {:sleep, ms}, ms + 5_000)
-          end)
-        end)
-
+        occupy_worker(n * 1_000)
         {:noreply, socket}
 
       _ ->
@@ -90,6 +83,15 @@ defmodule PoolexExampleWeb.PoolLive do
       [] ->
         {:noreply, socket}
     end
+  end
+
+  # Runs in a separate process: blocking the LiveView would freeze the page it visualises.
+  defp occupy_worker(ms) do
+    Task.start(fn ->
+      Poolex.run(@pool_id, fn worker ->
+        GenServer.call(worker, {:sleep, ms}, ms + 5_000)
+      end)
+    end)
   end
 
   defp schedule_tick, do: Process.send_after(self(), :tick, 1_000)

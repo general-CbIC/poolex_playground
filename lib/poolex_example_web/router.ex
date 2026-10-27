@@ -1,13 +1,16 @@
 defmodule PoolexExampleWeb.Router do
   use PoolexExampleWeb, :router
 
+  # Secure headers (CSP included) are set by `put_secure_browser_headers_with_csp/2`;
+  # Sobelow only recognises a literal `plug :put_secure_browser_headers`.
+  # sobelow_skip ["Config.Headers"]
   pipeline :browser do
     plug :accepts, ["html"]
     plug :fetch_session
     plug :fetch_live_flash
     plug :put_root_layout, html: {PoolexExampleWeb.Layouts, :root}
     plug :protect_from_forgery
-    plug :put_secure_browser_headers
+    plug :put_secure_browser_headers_with_csp
   end
 
   pipeline :api do
@@ -37,7 +40,33 @@ defmodule PoolexExampleWeb.Router do
     scope "/dev" do
       pipe_through :browser
 
-      live_dashboard "/dashboard", metrics: PoolexExampleWeb.Telemetry
+      live_dashboard "/dashboard",
+        metrics: PoolexExampleWeb.Telemetry,
+        csp_nonce_assign_key: :csp_nonce
     end
+  end
+
+  # The root layout carries an inline theme script, so scripts are allowed by a
+  # per-request nonce (exposed as `@csp_nonce`) instead of 'unsafe-inline'.
+  defp put_secure_browser_headers_with_csp(conn, _opts) do
+    nonce = 18 |> :crypto.strong_rand_bytes() |> Base.encode64()
+
+    policy =
+      Enum.join(
+        [
+          "default-src 'self'",
+          "script-src 'self' 'nonce-#{nonce}'",
+          "style-src 'self' 'unsafe-inline'",
+          "img-src 'self' data:",
+          "object-src 'none'",
+          "base-uri 'self'",
+          "frame-ancestors 'self'"
+        ],
+        "; "
+      )
+
+    conn
+    |> assign(:csp_nonce, nonce)
+    |> put_secure_browser_headers(%{"content-security-policy" => policy})
   end
 end
