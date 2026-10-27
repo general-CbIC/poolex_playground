@@ -19,6 +19,7 @@ mix phx.server       # dev server on http://localhost:4000 (esbuild + tailwind w
 iex -S mix phx.server
 
 mix precommit        # REQUIRED before finishing changes: compile --warnings-as-errors, deps.unlock --unused, format, test
+mix check            # full gate CI enforces (ex_check): compiler, formatter (Styler), credo --strict, dialyzer, sobelow, mix_audit, unused_deps, ex_unit
 mix test
 mix test test/poolex_example_web/live/pool_live_test.exs        # single file
 mix test test/poolex_example_web/live/pool_live_test.exs:12     # single test by line
@@ -28,6 +29,11 @@ mix format
 
 Toolchain is pinned in `.tool-versions` (Erlang 28.4.1 / Elixir 1.19.5-otp-28). `mix precommit` runs in `:test`
 env via the `cli/0` `preferred_envs` setting.
+
+`mix check` is configured in `.check.exs` (doctor/ex_doc/gettext are off: this is an app, not a library) and runs
+in CI as the `static-analysis` job with `--except ex_unit`, since the `test` job already runs the suite. It
+retries only previously failed tools by default; use `mix check --no-retry` for a full run. Sobelow runs with
+`--skip`, so `# sobelow_skip [...]` comments are honoured — each one needs a reason next to it.
 
 ## Architecture
 
@@ -53,7 +59,9 @@ Key LiveView behaviours worth knowing before editing `PoolLive`:
 - `"acquire"`/`"release"` keep a manual LIFO stack of checked-out workers in the `:acquired_workers` assign;
   those workers stay busy until released, which is how the UI demonstrates pool exhaustion.
 
-`page_controller.ex` / `page_html/home.html.heex` are leftover Phoenix scaffolding and are not routed.
+The `:browser` pipeline sets a nonce-based Content-Security-Policy (`put_secure_browser_headers_with_csp/2` in the
+router). Any new inline `<script>` needs `nonce={@csp_nonce}`, otherwise the browser blocks it — tests won't catch
+that.
 
 ## Assets
 
