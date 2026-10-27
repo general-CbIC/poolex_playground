@@ -3,6 +3,8 @@ defmodule PoolexExampleWeb.PoolLiveTest do
 
   import Phoenix.LiveViewTest
 
+  alias Poolex.Private.DebugInfo
+
   @pool_id :demo_pool
   @timeout 2_000
   @poll_interval 10
@@ -16,7 +18,7 @@ defmodule PoolexExampleWeb.PoolLiveTest do
 
   test "mounts and shows Poolex version", %{conn: conn} do
     {:ok, _view, html} = live(conn, "/")
-    poolex_version = Application.spec(:poolex, :vsn) |> to_string()
+    poolex_version = :poolex |> Application.spec(:vsn) |> to_string()
     assert html =~ poolex_version
   end
 
@@ -83,7 +85,7 @@ defmodule PoolexExampleWeb.PoolLiveTest do
     wait_for_idle_pool()
   end
 
-  defp debug_info, do: Poolex.Private.DebugInfo.get_debug_info(@pool_id)
+  defp debug_info, do: DebugInfo.get_debug_info(@pool_id)
 
   defp idle_workers_count, do: debug_info().idle_workers_count
 

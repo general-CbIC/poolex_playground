@@ -19,15 +19,16 @@ defmodule PoolexExampleWeb.ConnCase do
 
   using do
     quote do
-      # The default endpoint for testing
-      @endpoint PoolexExampleWeb.Endpoint
-
       use PoolexExampleWeb, :verified_routes
+
+      import Phoenix.ConnTest
 
       # Import conveniences for testing with connections
       import Plug.Conn
-      import Phoenix.ConnTest
       import PoolexExampleWeb.ConnCase
+
+      # The default endpoint for testing
+      @endpoint PoolexExampleWeb.Endpoint
     end
   end
 

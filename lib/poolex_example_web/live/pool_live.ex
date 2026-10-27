@@ -1,5 +1,8 @@
 defmodule PoolexExampleWeb.PoolLive do
+  @moduledoc false
   use PoolexExampleWeb, :live_view
+
+  alias Poolex.Private.DebugInfo
 
   @pool_id :demo_pool
 
@@ -7,8 +10,8 @@ defmodule PoolexExampleWeb.PoolLive do
   def mount(_params, _session, socket) do
     if connected?(socket), do: schedule_tick()
 
-    poolex_version = Application.spec(:poolex, :vsn) |> to_string()
-    debug_info = Poolex.Private.DebugInfo.get_debug_info(@pool_id)
+    poolex_version = :poolex |> Application.spec(:vsn) |> to_string()
+    debug_info = DebugInfo.get_debug_info(@pool_id)
     {milliseconds_from_start, _since_last_call} = :erlang.statistics(:wall_clock)
 
     {:ok,
@@ -26,37 +29,29 @@ defmodule PoolexExampleWeb.PoolLive do
   def handle_info(:tick, socket) do
     schedule_tick()
 
-    debug_info = Poolex.Private.DebugInfo.get_debug_info(@pool_id)
+    debug_info = DebugInfo.get_debug_info(@pool_id)
     {milliseconds_from_start, _since_last_call} = :erlang.statistics(:wall_clock)
 
-    {:noreply,
-     assign(socket, debug_info: debug_info, milliseconds_from_start: milliseconds_from_start)}
+    {:noreply, assign(socket, debug_info: debug_info, milliseconds_from_start: milliseconds_from_start)}
   end
 
   @impl true
   def handle_event("add_worker", _params, socket) do
     Poolex.add_idle_workers!(@pool_id, 1)
-    {:noreply, assign(socket, debug_info: Poolex.Private.DebugInfo.get_debug_info(@pool_id))}
+    {:noreply, assign(socket, debug_info: DebugInfo.get_debug_info(@pool_id))}
   end
 
   @impl true
   def handle_event("remove_worker", _params, socket) do
     Poolex.remove_idle_workers!(@pool_id, 1)
-    {:noreply, assign(socket, debug_info: Poolex.Private.DebugInfo.get_debug_info(@pool_id))}
+    {:noreply, assign(socket, debug_info: DebugInfo.get_debug_info(@pool_id))}
   end
 
   @impl true
   def handle_event("occupy", %{"duration" => secs}, socket) do
     case Integer.parse(secs) do
       {n, ""} when n > 0 ->
-        ms = n * 1_000
-
-        Task.start(fn ->
-          Poolex.run(@pool_id, fn worker ->
-            GenServer.call(worker, {:sleep, ms}, ms + 5_000)
-          end)
-        end)
-
+        occupy_worker(n * 1_000)
         {:noreply, socket}
 
       _ ->
@@ -88,6 +83,15 @@ defmodule PoolexExampleWeb.PoolLive do
       [] ->
         {:noreply, socket}
     end
+  end
+
+  # Runs in a separate process: blocking the LiveView would freeze the page it visualises.
+  defp occupy_worker(ms) do
+    Task.start(fn ->
+      Poolex.run(@pool_id, fn worker ->
+        GenServer.call(worker, {:sleep, ms}, ms + 5_000)
+      end)
+    end)
   end
 
   defp schedule_tick, do: Process.send_after(self(), :tick, 1_000)
