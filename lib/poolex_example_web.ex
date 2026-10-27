@@ -17,8 +17,7 @@ defmodule PoolexExampleWeb do
   those modules here.
   """
 
-  def static_paths,
-    do: ~w(
+  def static_paths, do: ~w(
       android-chrome-192x192.png
       android-chrome-512x512.png
       apple-touch-icon.png
@@ -35,10 +34,11 @@ defmodule PoolexExampleWeb do
     quote do
       use Phoenix.Router, helpers: false
 
-      # Import common connection and controller functions to use in pipelines
-      import Plug.Conn
       import Phoenix.Controller
       import Phoenix.LiveView.Router
+
+      # Import common connection and controller functions to use in pipelines
+      import Plug.Conn
     end
   end
 

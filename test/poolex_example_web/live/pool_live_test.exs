@@ -16,7 +16,7 @@ defmodule PoolexExampleWeb.PoolLiveTest do
 
   test "mounts and shows Poolex version", %{conn: conn} do
     {:ok, _view, html} = live(conn, "/")
-    poolex_version = Application.spec(:poolex, :vsn) |> to_string()
+    poolex_version = :poolex |> Application.spec(:vsn) |> to_string()
     assert html =~ poolex_version
   end
 
