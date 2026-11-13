@@ -62,7 +62,7 @@ defmodule PoolexExample.MixProject do
       {:dialyxir, "~> 1.4", only: [:dev], runtime: false},
       {:ex_check, "~> 0.17.1", only: [:dev], runtime: false},
       {:mix_audit, "~> 2.1", only: [:dev], runtime: false},
-      {:sobelow, "~> 0.16.0", only: [:dev], runtime: false},
+      {:sobelow, "~> 0.18.1", only: [:dev], runtime: false},
       {:styler, "~> 1.12", only: [:dev, :test], runtime: false}
     ]
   end
